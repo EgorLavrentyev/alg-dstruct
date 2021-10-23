@@ -1,0 +1,11 @@
+/Debug
+/Release
+/packages.config
+/packages
+*.sln
+*.vcxproj
+*.filters
+*.user
+*.suo
+*.db
+/.vs
