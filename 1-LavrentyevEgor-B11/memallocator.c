@@ -19,35 +19,43 @@ int meminit(void* pMemory, int size)
     {
         return 0;
     }
-
-    memlist.head = (descriptor_t*)pMemory;
-    memlist.head->next = NULL;
-    memlist.head->prev = NULL;
-    memlist.head->size = size - memgetblocksize();
-    memlist.head->isFree = 1;
-    memlist.fullsize = size;
-
+    else
+    {
+        memlist.head = (descriptor_t*)pMemory;
+        memlist.head->next = NULL;
+        memlist.head->prev = NULL;
+        memlist.head->size = size - memgetblocksize();
+        memlist.head->isFree = 1;
+        memlist.fullsize = size;
+    }
     return 1;
-
 }
 
 void* memalloc(int size)
 {
     void* ptr = NULL;
-    descriptor_t* tmp = memlist.head;
+    descriptor_t* tmp;
     int descrsize = memgetblocksize();
-    while (!(tmp->isFree == 1) && (tmp->size >= size + descrsize))
+    if (size <= 0 || memlist.head == NULL)
+    {
+        return NULL;
+    }
+
+    tmp = memlist.head;
+
+    while (!((tmp->isFree == 1) && (tmp->size >= size)))
     {
         if (!tmp->next)
         {
             return NULL;
         }
-        
-        tmp = tmp->next;
-
+        else
+        {
+            tmp = tmp->next;
+        }
     }
 
-    if ((tmp->size - 2 * descrsize) > size) //if size of found block > required size
+    if (tmp->size > size + descrsize) //if size of found block > required size
     {
         //describing right block
         descriptor_t* right = (descriptor_t*)((char*)tmp + size + descrsize);
@@ -63,13 +71,12 @@ void* memalloc(int size)
 
         //describing left block
 
-        tmp->size = size + descrsize;
+        tmp->size = size;
         tmp->next = right;
         tmp->isFree = 0;
     }
     else
     {
-        tmp->size = size + descrsize;
         tmp->isFree = 0;
     }
     ptr = (void*)((char*)tmp + descrsize);
@@ -90,7 +97,7 @@ void memfree(void* p)
         if (free_p >= memlist.head && free_p <= memlist.head + memlist.fullsize && !(free_p->isFree)) //if block was taken from our memory list
         {
             free_p->isFree = 1;
-            
+
             if (free_p->next && free_p->next->isFree) //if it is possible to merge with right block:
             {
                 //describing new "big" block
@@ -106,23 +113,39 @@ void memfree(void* p)
                 {
                     tmp->next = NULL;
                 }
+
+                if (tmp->prev)
+                {
+                    tmp->prev->next = tmp;
+                }
+                else
+                {
+                    tmp->prev = NULL;
+                }
             }
 
             if (free_p->prev && free_p->prev->isFree) //if it is possible to merge with left block:
             {
 
                 tmp = free_p->prev;
-                tmp->size = descrsize + tmp->size + tmp->next->size;
+                if (tmp->next)
+                {
+                    tmp->size = descrsize + tmp->size + tmp->next->size;
+                }
 
-                if (tmp->next->next)
+                if (tmp->next)
                 {
-                    tmp->next->next->prev = tmp;
-                    tmp->next = tmp->next->next;
+                    if (tmp->next->next)
+                    {
+                        tmp->next->next->prev = tmp;
+                        tmp->next = tmp->next->next;
+                    }
+                    else
+                    {
+                        tmp->next = NULL;
+                    }
                 }
-                else
-                {
-                    tmp->next = NULL;
-                }
+
             }
         }
     }
