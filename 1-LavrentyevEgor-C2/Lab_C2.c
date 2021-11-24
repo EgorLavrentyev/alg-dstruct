@@ -38,6 +38,8 @@ list_t* CreateList(void)
 
 void PushBack(list_t* list, int firstNode, int secondNode)
 {
+
+
 	edge_t* tmp = list->head;
 	edge_t* edge = (edge_t*)malloc(sizeof(edge_t));
 	if (!edge)
@@ -70,16 +72,17 @@ void DFS(list_t* list, int weight)
 	nodes[weight].isVisited = 1;
 
 	int minWeight = numNodes;
-	int flag = 0;
+
 	edge_t* tmp = list->head;
 
-	while (flag != 1)
+	while (1)
 	{
 		tmp = list->head;  //rebuilding pointer 
 		minWeight = numNodes;  //rebuilding variable
 
-		for (int i = 0; i < numEdges; i++)    // looking for the edges that is incidental to the vertex "weight"						  
-		{										// and vertexes that is not visited
+		for (int i = 0; i < numEdges; i++)    // looking for the edges that is incidental to the vertex "weight"
+											  // and vertexes that is not visited
+		{
 			if (tmp->firstNode == weight && nodes[tmp->secondNode].isVisited == 0 && minWeight > tmp->secondNode)
 			{
 				minWeight = tmp->secondNode;
@@ -93,12 +96,13 @@ void DFS(list_t* list, int weight)
 			tmp = tmp->next;
 		}
 
-		flag = 1;
-
 		if (minWeight != numNodes)   //if we haven't searched every vertex yet
 		{
 			DFS(list, minWeight);
-			flag = 0;
+		}
+		else
+		{
+			break;
 		}
 	}
 }
@@ -114,6 +118,7 @@ void DestroyList(list_t* list)
 
 	do
 	{
+
 		next = tmp->next;
 		free(tmp);
 		tmp = next;
