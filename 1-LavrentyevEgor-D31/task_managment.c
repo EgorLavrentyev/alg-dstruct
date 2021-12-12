@@ -22,8 +22,13 @@ unsigned int isSolved(int* result)
 	for (int i = 0; i < m; i++)
 	{
 		if (sums[i] > D)
+		{
+			free(sums);
 			return 0;
+		}
+			
 	}
+	free(sums);
 	return 1;
 }
 
@@ -101,6 +106,8 @@ int main(void)
 
 	fclose(f_input);
 	fclose(f_output);
+	free(T);
+	free(result);
 
 	return 0;
 }
