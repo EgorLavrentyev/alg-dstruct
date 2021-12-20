@@ -200,6 +200,6 @@ int main(void)
 	printf("\n\n");
 	Search(tree, 56);
 	printf("\n\n");
-
+	DestroyTree(tree);
 	return 0;
 }
